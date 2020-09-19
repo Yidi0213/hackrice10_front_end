@@ -1,0 +1,29 @@
+.nav{
+    background-color: rgba(11, 87, 219, 0.976);
+    height: 70px;
+    color: white;
+    /* position: relative; */
+    /* display: inline-block; */
+    /* align-items: center; */
+    /* justify-content: center; */
+    /* text-align: center; */
+}
+
+.center{
+    position: relative;
+    align-items: center;
+    justify-content: center;
+    
+}
+
+.c{
+    position: flex;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+}
+
+
+.height{
+    height:100%
+}
