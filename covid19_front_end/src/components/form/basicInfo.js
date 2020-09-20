@@ -16,6 +16,8 @@ import FormLabel from "@material-ui/core/FormLabel";
 import Checkbox from "@material-ui/core/Checkbox";
 import { fire, firedb } from "../../config/Firebase";
 import { auth } from "firebase";
+import Grid from "@material-ui/core/Grid";
+import pic from "./covid19.jpg";
 
 const step1 = [
   "Location",
@@ -83,6 +85,13 @@ class BasicInfo extends Component {
       "Prior Disease(Medical Problems) History",
       "Previous contacts with COVID-19 patients",
     ],
+    scores: {
+      display: false,
+      loc_risk: null,
+      overall_risk: null,
+      precondition_risk: null,
+      symptomps_risk: null,
+    },
   };
 
   handleContact = () => {
@@ -112,6 +121,9 @@ class BasicInfo extends Component {
                 prevState.priorDisease = data.priorDisease;
                 prevState.symptoms = data.symptoms;
                 prevState.steps = data.steps;
+                prevState.basicInfo.gender = data.basicInfo.gender==1 ? 'male':'female';
+                prevState.basicInfo.smoking = data.basicInfo.smoking==1 ? 'yes':'no';
+                prevState.basicInfo.preganancy = data.basicInfo.preganancy==1 ? 'yes':'no';
                 return prevState;
               });
             }
@@ -243,11 +255,6 @@ class BasicInfo extends Component {
                   value="male"
                   control={<Radio />}
                   label="Male"
-                />
-                <FormControlLabel
-                  value="other"
-                  control={<Radio />}
-                  label="Other"
                 />
               </RadioGroup>
             </FormControl>
@@ -406,69 +413,162 @@ class BasicInfo extends Component {
     data.basicInfo.smoking = data.basicInfo.smoking == "yes" ? true : false;
     data.basicInfo.age = +data.basicInfo.age;
     data.location.zipcode = +data.location.zipcode;
-    data.basicInfo.sex = data.basicInfo.sex === "female" ? 0 : 1;
+    data.basicInfo.gender = data.basicInfo.sex === "female" ? 0 : 1;
     data["userID"] = fire.auth().currentUser.uid;
     firedb
       .collection("basic_info")
       .doc(fire.auth().currentUser.uid)
       .set(data)
-      .then((docRef) => {
-        console.log(docRef.id);
-      })
+      .then((docRef) => {})
       .catch((err) => {
         console.log(err);
       });
   };
 
   handleGetScore = () => {
-    fetch("https://10.36.31.66/dynamic_score", {
-      method: "POST",
-      body: JSON.stringify(this.state),
-    }).then((res) => {
-      console.log(res);
-    });
+    // let user = fire.auth().currentUser;
+    // var query = firedb
+    //   .collection("basic_info")
+    //   .doc(user.uid)
+    //   .get()
+    //   .then((doc) => {
+    //     console.log(doc.data());
+    //     if (doc.exists) {
+    //       fetch("https://test--flask.herokuapp.com/static_score", {
+    //         headers: {
+    //           Accept: "application/json",
+    //           "Content-Type": "application/json",
+    //         },
+    //         method: "POST",
+    //         body: JSON.stringify(doc.data()),
+    //       })
+    //         .then((res) => res.json())
+    //         .then((res) => {
+    //           this.setState((prev) => {
+    //             prev.scores = { ...res };
+    //             prev.scores.display = true;
+    //             return prev;
+    //           });
+    //         });
+    //     }
+    //   });
+    let data = {
+      basicInfo: this.state.basicInfo,
+      contact: this.state.contact,
+      location: this.state.location,
+      priorDisease: this.state.priorDisease,
+      symptoms: this.state.symptoms,
+      steps: this.state.steps,
+      activeStep: 0,
+    };
+    data.basicInfo.preganancy =
+      data.basicInfo.preganancy == "yes" ? true : false;
+    data.basicInfo.smoking = data.basicInfo.smoking == "yes" ? true : false;
+    data.basicInfo.age = +data.basicInfo.age;
+    data.location.zipcode = +data.location.zipcode;
+    data.basicInfo.gender = data.basicInfo.sex === "female" ? 0 : 1;
+    // console.log(data);
+    fetch("https://test--flask.herokuapp.com/static_score", {
+            headers: {
+              Accept: "application/json",
+              "Content-Type": "application/json",
+            },
+            method: "POST",
+            body: JSON.stringify(data),
+          })
+            .then((res) => res.json())
+            .then((res) => {
+              this.setState((prev) => {
+                prev.scores = { ...res };
+                prev.scores.display = true;
+                return prev;
+              });
+            });
   };
+
   render() {
+    let text;
+    if (this.state.scores.display) {
+      text = (<div className={module.result}>
+        <h1 className={module.result}>Overall Risk:{this.state.scores.overall_risk}</h1>
+      <h1 className={module.result}>Location Risk:{this.state.scores.loc_risk}</h1>
+      <h1 className={module.result}>Precondition Risk:{this.state.scores.precondition_risk}</h1>
+      <h1 className={module.result}>Symptoms Risk:{this.state.scores.symptoms_risk}</h1>
+      </div>);
+    } else {
+      text = <div><h1 className={module.instruction}>Instruction: Please log in first and then fill out the form in the left side</h1></div>;
+    }
+
     return (
-      <div>
-        <Stepper activeStep={this.state.activeStep} orientation="vertical">
-          {this.state.steps.map((label, index) => (
-            <Step key={label}>
-              <StepLabel>{label}</StepLabel>
-              <StepContent>
-                {this.getStepContent(index)}
-                <div>
-                  <div>
-                    <Button
-                      disabled={this.state.activeStep === 0}
-                      onClick={this.handleBack}
-                    >
-                      Back
-                    </Button>
-                    <Button
-                      variant="contained"
-                      color="primary"
-                      onClick={this.handleNext}
-                    >
-                      {this.state.activeStep === this.state.steps.length - 1
-                        ? "Finish"
-                        : "Next"}
-                    </Button>
-                  </div>
-                </div>
-              </StepContent>
-            </Step>
-          ))}
-        </Stepper>
-        {this.state.activeStep === this.state.steps.length && (
-          <Paper square elevation={0}>
-            <Typography>All steps completed - you&apos;re finished</Typography>
-            <Button onClick={this.handleSubmit}>Submit</Button>
-            <Button onClick={this.handleReset}>Reset</Button>
-          </Paper>
-        )}
-        <button onClick={this.handleGetScore}>get somethings</button>
-      </div>
+      <Grid container style={{ height: "1000px" }}>
+        <Grid item xs={12} sm={5} md={4}>
+          <div>
+            <Stepper activeStep={this.state.activeStep} orientation="vertical">
+              {this.state.steps.map((label, index) => (
+                <Step key={label}>
+                  <StepLabel>{label}</StepLabel>
+                  <StepContent>
+                    {this.getStepContent(index)}
+                    <div>
+                      <div>
+                        <Button
+                          disabled={this.state.activeStep === 0}
+                          onClick={this.handleBack}
+                        >
+                          Back
+                        </Button>
+                        <Button
+                          variant="contained"
+                          color="primary"
+                          onClick={this.handleNext}
+                        >
+                          {this.state.activeStep === this.state.steps.length - 1
+                            ? "Finish"
+                            : "Next"}
+                        </Button>
+                      </div>
+                    </div>
+                  </StepContent>
+                </Step>
+              ))}
+            </Stepper>
+            {this.state.activeStep === this.state.steps.length && (
+              <Paper square elevation={0}>
+                <Typography>
+                  All steps completed - you&apos;re finished
+                </Typography>
+                <Button onClick={this.handleSubmit} color="primary">
+                  Save
+                </Button>
+                <Button onClick={this.handleBack}>Back</Button>
+                <Button
+                  onClick={this.handleGetScore}
+                  color="primary"
+                  variant="contained"
+                >
+                  Get Score
+                </Button>
+              </Paper>
+            )}
+          </div>
+        </Grid>
+        <Grid item xs={12} sm={7} md={8}>
+          <div style={{ backgroundImage: `url(${pic})`, height: "100%"}} className={module.words}>
+            <p
+              style={{
+                margin: "0",
+                padding: "10px",
+                fontSize: "1.5rem",
+                fontWeight: "bold",
+                backgroundColor:"wheat"
+              }}
+            >
+              Risk Factor Score:
+            </p>
+            {text}
+          </div>
+        </Grid>
+      </Grid>
     );
   }
 }

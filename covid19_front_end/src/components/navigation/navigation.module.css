@@ -1,5 +1,5 @@
 .nav{
-    background-color: rgba(11, 87, 219, 0.976);
+    background-color: rgba(6, 60, 152, 0.976);
     height: 70px;
     color: white;
     /* position: relative; */
@@ -21,7 +21,15 @@
     align-items: center;
     justify-content: center;
     text-align: center;
+}
 
+.logo{
+    color: black;
+    font-size: 1rem;
+    position: flex;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
 }
 
 

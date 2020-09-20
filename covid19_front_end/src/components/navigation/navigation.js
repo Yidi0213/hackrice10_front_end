@@ -4,7 +4,8 @@ import module from "./navigation.module.css";
 import Button from "@material-ui/core/Button";
 import ButtonGroup from "@material-ui/core/ButtonGroup";
 import { Link } from "react-router-dom";
-import { fire} from "../../config/Firebase";
+import { fire } from "../../config/Firebase";
+import pic from "./logo.png";
 
 let Navigation = () => {
   const [user, setUser] = useState(null);
@@ -20,9 +21,6 @@ let Navigation = () => {
             aria-label="contained primary button group"
           >
             <Button onClick={() => fire.auth().signOut()}>Log out</Button>
-            <Button>
-              <Link to="/basic_info">User Info</Link>
-            </Button>
           </ButtonGroup>
         );
       } else {
@@ -44,12 +42,16 @@ let Navigation = () => {
       }
     });
   }, []);
+
   return (
     <div className={module.nav}>
       <div style={{ height: "100%" }}>
         <Grid container style={{ height: "100%" }}>
-          <Grid item xs={4} className={module.c}>
-            Covid 19 Risk Factor Score
+          <Grid item xs={2}>
+              <img src={pic} style= {{height:"60px",width:"60px"}}></img>
+          </Grid>
+          <Grid item xs={2} className={module.logo}>
+            Covid 19 Risk Factor Score Calculator
           </Grid>
           <Grid item xs={2}></Grid>
           <Grid item xs={6} className={module.c}>
