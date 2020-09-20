@@ -17,7 +17,7 @@ const firebaseConfig = {
 const Firebase = firebase.initializeApp(firebaseConfig);
 
 var ui = new firebaseui.auth.AuthUI(firebase.auth());
-
+const db = firebase.firestore();
 const firebaseui_init = () => {
   ui.start("#firebaseui-auth-container", {
     signInFlow: 'popup',
@@ -35,5 +35,9 @@ const firebaseui_init = () => {
   });
 };
 
+// const basicInfos = db.collection('basic_info');
+// console.log(basicInfos);
+
 export const fire = Firebase;
 export const authui_init = firebaseui_init;
+export const firedb = db;

@@ -4,11 +4,10 @@ import module from "./navigation.module.css";
 import Button from "@material-ui/core/Button";
 import ButtonGroup from "@material-ui/core/ButtonGroup";
 import { Link } from "react-router-dom";
-import { fire } from "../../config/Firebase";
+import { fire} from "../../config/Firebase";
 
 let Navigation = () => {
   const [user, setUser] = useState(null);
-  //   let action = null;
   const [action, setAction] = useState(null);
   useEffect(() => {
     fire.auth().onAuthStateChanged((user) => {
